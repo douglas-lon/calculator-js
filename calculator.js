@@ -1,101 +1,106 @@
+const calculator = function() {
 
-class Calculator {
+    class Calculator {
+        #x
+        #y
+        #result
 
-    #x
-    #y
-    #result
+        sum() {
+            this.#result = Number(this.#x) + Number(this.#y)
+        }
 
-    sum() {
-        this.#result = Number(this.#x) + Number(this.#y)
+        subtract() {
+            this.#result = Number(this.#x) - Number(this.#y)
+        }
+
+        multiply() {
+            this.#result = Number(this.#x) * Number(this.#y)
+        }
+
+        divide() {
+            this.#result = Number(this.#x) / Number(this.#y)
+        }
+
+        percentage() {
+            this.#result = 0
+        }
+
+        evalExpression(exp) {
+
+            let operators = ['+', '-','/', '*']
+            let methods = [this.sum, this.subtract, this.divide,this.multiply]
+
+            for (let i in operators) {
+                if (!this.#evalOne(exp, operators[i], methods[i])) {
+                    continue
+                } else {
+                    break
+                }
+            }
+        }
+
+        getResult() {
+            return this.#result
+        }
+
+        #evalOne(exp, char, meth) {
+            if (exp.indexOf(char) != -1) {
+                let nums = exp.split(char)
+                this.#x = nums[0]
+                this.#y = nums[1]
+                meth.call(this)
+
+                return true
+            }
+            return false
+        }
+
     }
 
-    subtract() {
-        this.#result = Number(this.#x) - Number(this.#y)
-    }
+    function addBtnsEvent(exp,viw) {
+        let specialKeys = ['()', '[=','C', '=']
 
-    multiply() {
-        this.#result = Number(this.#x) * Number(this.#y)
-    }
+        let btns = document.querySelectorAll('button')
+        let specBtns = []
 
-    divide() {
-        this.#result = Number(this.#x) / Number(this.#y)
-    }
-
-    percentage() {
-
-    }
-
-    evalExpression(exp) {
-
-        let operators = ['+', '-','/', '*']
-        let methods = [this.sum, this.subtract, this.divide,this.multiply]
-
-        for (let i in operators) {
-            if (!this.#evalOne(exp, operators[i], methods[i])) {
-                continue
+        for (let i in btns) {
+            if (specialKeys.includes(btns[i].id)) {
+                specBtns.push(btns[i])
             } else {
-                break
+                btns[i].onclick = function() {
+                    exp[0] += btns[i].innerText
+                    viw.innerText = exp[0]
+                }
             }
         }
+        return specBtns
     }
 
-    getResult() {
-        return this.#result
-    }
-
-    #evalOne(exp, char, meth) {
-        if (exp.indexOf(char) != -1) {
-            let nums = exp.split(char)
-            this.#x = nums[0]
-            this.#y = nums[1]
-            meth.call(this)
-
-            return true
+    function configSpecialBtns(btns,exp, viw,calc) {
+        btns[1].onclick = function() {
+            exp[0] = exp[0].slice(0, exp[0].length - 1)
+            viw.innerText = exp[0]
         }
-
-        return false
+        btns[2].onclick = function() {
+            exp[0] = ''
+            viw.innerHTML = '&nbsp'
+        }
+        btns[3].onclick = function() {
+            calc.evalExpression(exp[0])
+            exp[0] = '' + calc.getResult()
+            viw.innerText = exp[0]
+        }
     }
 
+    function makeCalculator() {
+        let cal = new Calculator()
+        let viewer = document.querySelector('div#viewfinder')
+        let expression = ['']
+        let specialBtns = addBtnsEvent(expression, viewer)
+        configSpecialBtns(specialBtns, expression, viewer,cal)
+    }
+
+    window.addEventListener('load', makeCalculator)
 }
 
-const createCalculator = function() {
-    let calCont = document.querySelector('div#keyboard')
-    let viwer = document.querySelector('div#viewfinder')
-    let expression = ''
-    let cal = new Calculator()
-    createRow('fistRow', ['()', '%', '<=', 'C'])
-    createRow('secondRow',[7,8,9,'+'])
-    createRow('thirdRow',[4,5,6,'-'])
-    createRow('fourthRow',[1,2,3,'*'])
-    createRow('fifthRow',[0,'.','=','/'])
-
-    let equa = document.querySelector('[id="="]')
-    equa.onclick = function () {
-        cal.evalExpression(expression)
-        expression = cal.getResult()
-        viwer.innerText = expression
-    }
-
-
-    function createRow(id, charList) {
-        let row = document.createElement('div')
-        row.id = id
-        calCont.appendChild(row)
-        
-
-        for (let i in charList){
-            btn = document.createElement('button')
-            btn.id = charList[i]
-            btn.innerText = charList[i]
-            btn.onclick = function () {
-                expression += charList[i]
-                viwer.innerText = expression
-            }
-            row.appendChild(btn)
-        }
-
-    }
-
-}
-
-window.addEventListener('load', createCalculator)
+calculator()
