@@ -18,6 +18,11 @@ button {
     margin: 5px;
 }
 
+button:hover {
+    background-color: #ca8686;
+    transition: 0.5s;
+}
+
 .center {
     padding: 5%;
     border: 3px solid rgba(255, 255, 255, 0);
